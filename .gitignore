@@ -1,0 +1,47 @@
+# Entorno virtual
+env/
+myenv/
+
+# Archivos de configuración del entorno
+*.env
+
+# Archivos compilados de Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Archivos de distribución y paquetes
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyc
+
+# Archivos de base de datos
+*.sqlite3
+
+# Archivos de cobertura
+.coverage
+*.cover
+nosetests.xml
+coverage.xml
+*.hypothesis/
+.pytest_cache/
+
+# Archivos de configuraciones del IDE
+.vscode/
+.idea/
+
+# Archivos generados por el sistema
+.DS_Store
+*.swp
+*.swo
+
+# Archivos temporales
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
