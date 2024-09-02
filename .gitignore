@@ -1,0 +1,22 @@
+# Ignorar archivos de configuración del sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar directorios de compilación
+/build
+/dist
+
+# Ignorar dependencias de Python
+/env/
+/venv/
+*.pyc
+__pycache__/
+
+# Ignorar archivos de log
+*.log
+
+# Ignorar archivos de Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignorar el archivo de entorno de conda
+environment.yml
