@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, dash_table, Dash, Patch, clientside_callback, callback
+from dash import dcc, html, dash_table, Patch, clientside_callback, callback
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
