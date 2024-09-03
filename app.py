@@ -1,9 +1,15 @@
 import dash
-from dash import dcc, html, dash_table
+from dash import dcc, html, dash_table, Dash, Patch, clientside_callback, callback
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
+from dash_bootstrap_templates import load_figure_template
 import plotly.express as px
+import plotly.io as pio
 import numpy as np
 import pandas as pd
+
+# adds  templates to plotly.io
+load_figure_template(["minty", "minty_dark"])
 
 # Cargar los datos desde un CSV
 df = pd.read_csv('airline_passenger_satisfaction.csv')
@@ -12,7 +18,15 @@ df = pd.read_csv('airline_passenger_satisfaction.csv')
 class AirlineApp:
     def __init__(self):
         # Inicializar la aplicación Dash
-        self.app = dash.Dash(__name__)
+        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME])
+        
+        color_mode_switch =  html.Span(
+    [
+        dbc.Label(className="fa fa-moon", html_for="switch"),
+        dbc.Switch( id="switch", value=True, className="d-inline-block ms-1", persistence=True),
+        dbc.Label(className="fa fa-sun", html_for="switch"),
+    ]
+)
         
         # Definir el layout de la aplicación
         self.app.layout = self.create_layout()
@@ -114,8 +128,11 @@ class AirlineApp:
             Input('submit-button', 'n_clicks'),
             Input('input-edad', 'value'),
             Input('input-ingresos', 'value'),
-            Input('input-genero', 'value')
+            Input('input-genero', 'value'),
+            Input("color-mode-switch", "value"),
         )
+
+
         def actualizar_resultados(n_clicks, edad, ingresos, genero):
             if n_clicks > 0:
                 # Simulación de predicción y de importancia de características
@@ -132,7 +149,29 @@ class AirlineApp:
                 return f"El nivel de satisfacción predicho es: {prediccion}", importancia_fig, contribucion_fig
             
             return "", {}, {}
+        
+        def update_figure_template(switch_on):
+            
+        # When using Patch() to update the figure template, you must use the figure template dict
+        # from plotly.io  and not just the template name
+        
+            template = pio.templates["minty"] if switch_on else pio.templates["minty_dark"]
 
+            patched_figure = Patch()
+            patched_figure["layout"]["template"] = template
+            return patched_figure
+
+        self.app.clientside_callback(
+            """
+            function(switchOn) {
+                document.documentElement.setAttribute("data-bs-theme", switchOn ? "light" : "dark");
+                return window.dash_clientside.no_update;
+            }
+            """,
+            Output("color-mode-switch", "id"),
+            Input("color-mode-switch", "value"),
+        )
+        
     def run(self):
         # Ejecutar la aplicación
         self.app.run_server(debug=True)
