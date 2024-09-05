@@ -34,8 +34,7 @@ class Data(Base):
 
 
 # Schema
-class DataSchema(BaseModel):
-	id: int
+class FeatureSchema(BaseModel):
 	gender: str
 	customer: str
 	age: int
@@ -58,5 +57,3 @@ class DataSchema(BaseModel):
 	cleanliness: int
 	departure_delay: int
 	arrival_dealy: int
-	prediction: str
-

@@ -17,7 +17,7 @@ def get_db():
         db.close()
 
 @app.post("/predict/")
-def predict(data: model.DataSchema, db:Session = Depends(get_db)):
+def predict(data: model.FeatureSchema, db:Session = Depends(get_db)):
     db_data = crud.post_data(db, data)
     if db_data:
         return f"predict: {db_data}"
