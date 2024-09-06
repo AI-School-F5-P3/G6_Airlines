@@ -30,26 +30,25 @@ def which_age(num):
 def post_data(db: Session, datax: model.FeatureSchema):
 
 	x_dict = datax.model_dump()
-	# new_data = model.Data(**datax.model_dump())
-	# print(new_data)
 	x_dict['Age Group'] = which_age(x_dict['age'])
 	x_dict['arrival_dealy'] = float(x_dict['arrival_dealy'])
-	df = pd.DataFrame([list(x_dict.values())], columns=['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
+
+	cols = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
        'Flight Distance', 'Inflight wifi service',
        'Departure/Arrival time convenient', 'Ease of Online booking',
        'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
        'Inflight entertainment', 'On-board service', 'Leg room service',
        'Baggage handling', 'Checkin service', 'Inflight service',
        'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes',
-       'Age Group'])
+       'Age Group']
+	
+	df = pd.DataFrame([list(x_dict.values())], columns=cols)
 	df['Age Group'] = df['Age Group'].astype('category')
-	if not df.empty:
-		print(df.head())
-		print(df.info())
+	try:
 		prediction = pipeline.predict(df)
-		return(prediction)
-	else:
-		return({'Error': 'Empty df'})
+		return {"predicted_satisfaction": int(prediction[0])}
+	except Exception as e:
+		return {"error": f"Error en la predicción: {str(e)}"}
 
 def get_all_data(db: Session):
 	pass
