@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 import joblib
 import pandas as pd
 
@@ -44,11 +45,20 @@ def post_data(db: Session, datax: model.FeatureSchema):
 	
 	df = pd.DataFrame([list(x_dict.values())], columns=cols)
 	df['Age Group'] = df['Age Group'].astype('category')
+	
 	try:
 		prediction = pipeline.predict(df)
-		return {"predicted_satisfaction": int(prediction[0])}
-	except Exception as e:
-		return {"error": f"Error en la predicción: {str(e)}"}
-
+		data_db = datax.model_dump()
+		data_db['prediction'] = int(prediction[0])
+		new_data = model.Data(**data_db)
+		db.add(new_data)
+		db.commit()
+		return 1
+	except SQLAlchemyError:
+		db.rollback()
+	except Exception:
+		db.rollback()
+	return 0
+	
 def get_all_data(db: Session):
 	pass
