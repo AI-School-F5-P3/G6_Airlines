@@ -3,12 +3,12 @@ from dash import dcc, html, State, dash_table
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
-from catboost import CatBoostClassifier
 import numpy as np
 import pandas as pd
-import json
+import sqlite3  # Import sqlite3 for database operations
 from datetime import datetime
-
+import sklearn
+import pickle
 
 PRIMARY_COLOR = "#91C48A"
 SECONDARY_COLOR_1 = "#485751"
@@ -18,10 +18,10 @@ TEXT_COLOR = "#FFFFFF"
 BACKGROUND_COLOR = "fafbfd"
 
 
-def load_catboost_model(model_path):
-    model = CatBoostClassifier()
-    model.load_model(model_path)
-    return model
+def load_model():
+    with open('model_pipeline.pkl', 'rb') as file:
+        model = pickle.load(file)
+        return model
 
 
 df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
@@ -29,10 +29,43 @@ df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
 
 class AirlineApp:
     def __init__(self):
-        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME, "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"],suppress_callback_exceptions=True)
+        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME, "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"], suppress_callback_exceptions=True)
+        self.model = load_model()
         self.app.layout = self.create_layout()
         self.setup_callbacks()
         self.feedback_data = []
+        self.init_db()  # Initialize the database
+        self.model = load_model()
+        print(type(self.model)) 
+        
+    def init_db(self):
+        # Connect to the SQLite database
+        self.conn = sqlite3.connect('feedback.db')
+        self.cursor = self.conn.cursor()
+        # Create the feedback table if it doesn't exist
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                edad INTEGER,
+                ingresos REAL,
+                genero TEXT,
+                prediccion TEXT,
+                feedback TEXT,
+                timestamp TEXT
+            )
+        ''')
+        self.conn.commit()
+
+    def collect_feedback(self, n_clicks, feedback, edad, ingresos, genero, prediccion):
+        if n_clicks > 0 and feedback:
+            # Insert feedback into the database
+            self.cursor.execute('''
+                INSERT INTO feedback (edad, ingresos, genero, prediccion, feedback, timestamp)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (edad, ingresos, genero, prediccion, feedback, datetime.now().isoformat()))
+            self.conn.commit()
+            return "Gracias por tu feedback!"
+        return ""
 
     def create_layout(self):
         navbar = dbc.Navbar(
@@ -106,12 +139,15 @@ class AirlineApp:
         def actualizar_resultados(n_clicks, edad, ingresos, genero):
             if n_clicks > 0:
                 input_data = np.array([[edad, ingresos, 1 if genero == 'M' else 0]])
+                prediction = self.model.predict(input_data)[0]
+                prediction_label = "Alta" if prediction > 0.5 else "Baja"
+
                 importancia = {'Característica': ['Edad', 'Ingresos', 'Género'], 'Importancia': [0.4, 0.3, 0.3]}
                 importancia_fig = px.bar(importancia, x='Característica', y='Importancia', title='Importancia de las Características')
                 contribucion = {'Característica': ['Edad', 'Ingresos', 'Género'], 'Contribución': [0.5, 0.2, 0.3]}
                 contribucion_fig = px.pie(contribucion, values='Contribución', names='Característica', title='Contribución de las Características')
 
-                return f"El nivel de satisfacción predicho es: [Predicción no activa]", importancia_fig, contribucion_fig
+                return f"El nivel de satisfacción predicho es: {prediction_label}", importancia_fig, contribucion_fig
             
             return "", {}, {}
 
@@ -137,8 +173,8 @@ class AirlineApp:
         
         @self.app.callback(
             Output("feedback-message", "children"),
-            [Input("submit-feedback", "n-clicks")],
-            [State("user-feedabck", "value"),
+            [Input("submit-feedback", "n_clicks")],  # Corrected 'n-clicks' to 'n_clicks'
+            [State("user-feedback", "value"),  # Corrected 'user-feedabck' to 'user-feedback'
              State('input-edad', 'value'),
              State('input-ingresos', 'value'),
              State('input-genero', 'value'),
