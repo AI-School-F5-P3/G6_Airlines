@@ -17,6 +17,15 @@ SECONDARY_COLOR_3 = "#FFA9A3"
 TEXT_COLOR = "#FFFFFF"
 BACKGROUND_COLOR = "fafbfd"
 
+# Definición de cols
+cols = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
+        'Flight Distance', 'Inflight wifi service',
+        'Departure/Arrival time convenient', 'Ease of Online booking',
+        'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
+        'Inflight entertainment', 'On-board service', 'Leg room service',
+        'Baggage handling', 'Checkin service', 'Inflight service',
+        'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes',
+        'Age Group']
 
 def load_model():
     with open('model_pipeline.pkl', 'rb') as file:
@@ -129,24 +138,52 @@ class AirlineApp:
 
         @self.app.callback(
             [Output('output-prediccion', 'children'),
-             Output('importancia-grafico', 'figure'),
-             Output('contribucion-grafico', 'figure')],
-            [Input('submit-button', 'n_clicks'),
-             Input('input-edad', 'value'),
-             Input('input-ingresos', 'value'),
-             Input('input-genero', 'value')],
+            Output('importancia-grafico', 'figure'),
+            Output('contribucion-grafico', 'figure')],
+            [Input('submit-button', 'n_clicks')] +
+            [Input(f'input-{col.lower().replace(" ", "-")}', 'value') for col in cols]
         )
-        def actualizar_resultados(n_clicks, edad, ingresos, genero):
+        def actualizar_resultados(n_clicks, *inputs):
             if n_clicks > 0:
-                input_data = np.array([[edad, ingresos, 1 if genero == 'M' else 0]])
-                prediction = self.model.predict(input_data)[0]
+                # Crear un diccionario con los valores de entrada
+                input_dict = dict(zip(cols, inputs))
+                
+                # Preprocesamiento de los datos de entrada
+                input_data = []
+                for col in cols:
+                    if col in ['Gender', 'Customer Type', 'Type of Travel', 'Class']:
+                        # Para variables categóricas, usar codificación one-hot
+                        categories = {
+                            'Gender': ['Male', 'Female'],
+                            'Customer Type': ['Loyal Customer', 'disloyal Customer'],
+                            'Type of Travel': ['Personal Travel', 'Business travel'],
+                            'Class': ['Eco', 'Eco Plus', 'Business']
+                        }
+                        input_data.extend([1 if input_dict[col] == cat else 0 for cat in categories[col]])
+                    elif col == 'Age Group':
+                        # Para 'Age Group', convertir a numérico
+                        age_groups = ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']
+                        input_data.extend([1 if input_dict[col] == group else 0 for group in age_groups])
+                    else:
+                        # Para variables numéricas, usar el valor directamente
+                        input_data.append(float(input_dict[col]))
+                print(input_data)
+                # Convertir a numpy array y hacer la predicción
+                input_array = np.array([input_data])
+                prediction = self.model.predict(input_array)[0]
                 prediction_label = "Alta" if prediction > 0.5 else "Baja"
-
-                importancia = {'Característica': ['Edad', 'Ingresos', 'Género'], 'Importancia': [0.4, 0.3, 0.3]}
-                importancia_fig = px.bar(importancia, x='Característica', y='Importancia', title='Importancia de las Características')
-                contribucion = {'Característica': ['Edad', 'Ingresos', 'Género'], 'Contribución': [0.5, 0.2, 0.3]}
-                contribucion_fig = px.pie(contribucion, values='Contribución', names='Característica', title='Contribución de las Características')
-
+                
+                # Calcular importancia y contribución de las características (ejemplo simplificado)
+                importancia = {'Característica': cols, 'Importancia': np.random.rand(len(cols))}
+                importancia['Importancia'] /= np.sum(importancia['Importancia'])  # Normalizar
+                importancia_df = pd.DataFrame(importancia)
+                importancia_fig = px.bar(importancia_df, x='Característica', y='Importancia', title='Importancia de las Características')
+                
+                contribucion = {'Característica': cols, 'Contribución': np.abs(np.random.randn(len(cols)))}
+                contribucion['Contribución'] /= np.sum(contribucion['Contribución'])  # Normalizar
+                contribucion_df = pd.DataFrame(contribucion)
+                contribucion_fig = px.pie(contribucion_df, values='Contribución', names='Característica', title='Contribución de las Características')
+                
                 return f"El nivel de satisfacción predicho es: {prediction_label}", importancia_fig, contribucion_fig
             
             return "", {}, {}
@@ -238,28 +275,48 @@ class AirlineApp:
             html.Div([
                 html.Div([
                     html.H2("Parámetros de Entrada", style={"color": PRIMARY_COLOR}),
+                    
+                    # Inputs categóricos
+                    html.Label("Género", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Dropdown(id='input-gender', options=[{'label': i, 'value': i} for i in ['Male', 'Female']], value='Male'),
+                    
+                    html.Label("Tipo de Cliente", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Dropdown(id='input-customer-type', options=[{'label': i, 'value': i} for i in ['Loyal Customer', 'disloyal Customer']], value='Loyal Customer'),
+                    
+                    html.Label("Tipo de Viaje", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Dropdown(id='input-type-of-travel', options=[{'label': i, 'value': i} for i in ['Personal Travel', 'Business travel']], value='Personal Travel'),
+                    
+                    html.Label("Clase", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Dropdown(id='input-class', options=[{'label': i, 'value': i} for i in ['Eco', 'Eco Plus', 'Business']], value='Eco'),
+                    
+                    # Inputs numéricos
                     html.Label("Edad", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Slider(id='input-edad', min=18, max=100, value=30, marks={i: str(i) for i in range(18, 101, 10)}),
-                    html.Br(),
-                    html.Label("Ingresos anuales (en USD)", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Input(id='input-ingresos', type='number', value=50000, step=1000),
-                    html.Br(),
-                    html.Label("Género", style={'margin-top': '20px', "color": SECONDARY_COLOR_2}),
-                    dcc.Dropdown(
-                        id='input-genero',
-                        options=[
-                            {'label': 'Masculino', 'value': 'M'},
-                            {'label': 'Femenino', 'value': 'F'}
-                        ],
-                        value='M',
-                        style={"backgroundColor": PRIMARY_COLOR, "color": TEXT_COLOR}
-                    ),
+                    dcc.Input(id='input-age', type='number', value=30),
+                    
+                    html.Label("Distancia de Vuelo", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Input(id='input-flight-distance', type='number', value=1000),
+                    
+                    # Inputs para servicios (escala 1-5)
+                    [(html.Label(service, style={"color": SECONDARY_COLOR_2}),
+                    dcc.Slider(id=f'input-{service.lower().replace(" ", "-")}', min=1, max=5, marks={i: str(i) for i in range(1, 6)}, value=3)) 
+                    for service in ['Inflight wifi service', 'Departure/Arrival time convenient', 'Ease of Online booking',
+                                    'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
+                                    'Inflight entertainment', 'On-board service', 'Leg room service',
+                                    'Baggage handling', 'Checkin service', 'Inflight service', 'Cleanliness']],
+                    
+                    html.Label("Retraso en la Salida (minutos)", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Input(id='input-departure-delay-in-minutes', type='number', value=0),
+                    
+                    html.Label("Retraso en la Llegada (minutos)", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Input(id='input-arrival-delay-in-minutes', type='number', value=0),
+                    
+                    html.Label("Grupo de Edad", style={"color": SECONDARY_COLOR_2}),
+                    dcc.Dropdown(id='input-age-group', options=[{'label': i, 'value': i} for i in ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']], value='25-34'),
+                    
                     html.Br(),
                     html.Button('Predecir', id='submit-button', n_clicks=0, style={'backgroundColor': SECONDARY_COLOR_1, 'color': TEXT_COLOR}),
-                ], style={'width': '100%', 'max-width': '400px', 'padding': '20px', 'backgroundColor': SECONDARY_COLOR_1, 'border-radius': '10px'})
+                ], style={'width': '100%', 'max-width': '600px', 'padding': '20px', 'backgroundColor': SECONDARY_COLOR_1, 'border-radius': '10px'})
             ], style={'display': 'flex', 'justify-content': 'center'}),
-            html.Br(),
-
             html.Br(),
             html.Div([
                 html.H2("Resultados de la Predicción", style={"color": PRIMARY_COLOR}),
