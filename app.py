@@ -296,13 +296,24 @@ class AirlineApp:
                     html.Label("Distancia de Vuelo", style={"color": SECONDARY_COLOR_2}),
                     dcc.Input(id='input-flight-distance', type='number', value=1000),
                     
-                    # Inputs para servicios (escala 1-5)
-                    [(html.Label(service, style={"color": SECONDARY_COLOR_2}),
-                    dcc.Slider(id=f'input-{service.lower().replace(" ", "-")}', min=1, max=5, marks={i: str(i) for i in range(1, 6)}, value=3)) 
-                    for service in ['Inflight wifi service', 'Departure/Arrival time convenient', 'Ease of Online booking',
-                                    'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
-                                    'Inflight entertainment', 'On-board service', 'Leg room service',
-                                    'Baggage handling', 'Checkin service', 'Inflight service', 'Cleanliness']],
+                    # Sliders para servicios (escala 1-5)
+                    html.Div([
+                        html.Div([
+                            html.Label(service, style={"color": SECONDARY_COLOR_2}),
+                            dcc.Slider(
+                                id=f'input-{service.lower().replace(" ", "-")}',
+                                min=1,
+                                max=5,
+                                marks={i: str(i) for i in range(1, 6)},
+                                value=3
+                            )
+                        ]) for service in [
+                            'Inflight wifi service', 'Departure/Arrival time convenient', 'Ease of Online booking',
+                            'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
+                            'Inflight entertainment', 'On-board service', 'Leg room service',
+                            'Baggage handling', 'Checkin service', 'Inflight service', 'Cleanliness'
+                        ]
+                    ]),
                     
                     html.Label("Retraso en la Salida (minutos)", style={"color": SECONDARY_COLOR_2}),
                     dcc.Input(id='input-departure-delay-in-minutes', type='number', value=0),
