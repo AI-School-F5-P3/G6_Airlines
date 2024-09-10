@@ -25,8 +25,7 @@ cols = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
         'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
         'Inflight entertainment', 'On-board service', 'Leg room service',
         'Baggage handling', 'Checkin service', 'Inflight service',
-        'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes',
-        'Age Group']
+        'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes']
 
 
 df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
@@ -144,6 +143,7 @@ class AirlineApp:
                 # Hacer la llamada a la API
                 api_url = "http://127.0.0.1:8000/predict"
                 try:
+                    print(input_dict)
                     response = requests.post(api_url, json=input_dict)
                     response.raise_for_status()  # Esto lanzará una excepción para códigos de estado HTTP no exitosos
                     api_response = response.json()
@@ -301,8 +301,8 @@ class AirlineApp:
                     html.Label("Retraso en la Llegada (minutos)", style={"color": SECONDARY_COLOR_2}),
                     dcc.Input(id='input-arrival-delay-in-minutes', type='number', value=0),
                     
-                    html.Label("Grupo de Edad", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Dropdown(id='input-age-group', options=[{'label': i, 'value': i} for i in ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']], value='25-34'),
+                   # html.Label("Grupo de Edad", style={"color": SECONDARY_COLOR_2}),
+                    #dcc.Dropdown(id='input-age-group', options=[{'label': i, 'value': i} for i in ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']], value='25-34'),
                     
                     html.Br(),
                     html.Button('Predecir', id='submit-button', n_clicks=0, style={'backgroundColor': SECONDARY_COLOR_1, 'color': TEXT_COLOR}),
