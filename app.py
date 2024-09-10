@@ -19,13 +19,13 @@ TEXT_COLOR = "#FFFFFF"
 BACKGROUND_COLOR = "fafbfd"
 
 # Definición de cols
-cols = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
-        'Flight Distance', 'Inflight wifi service',
-        'Departure/Arrival time convenient', 'Ease of Online booking',
-        'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
-        'Inflight entertainment', 'On-board service', 'Leg room service',
-        'Baggage handling', 'Checkin service', 'Inflight service',
-        'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes']
+cols = ['gender', 'customer', 'age', 'type_travel', 'class_flight',
+        'distance', 'wifi',
+        'arrival_time', 'online_booking',
+        'gate_location', 'food_drink', 'online_boarding', 'seat_confort',
+        'entertainment', 'on_board', 'leg_room',
+        'baggage_handling', 'checkin', 'inflight_serv',
+        'cleanliness', 'departure_delay', 'arrival_dealy']
 
 
 df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
@@ -143,29 +143,31 @@ class AirlineApp:
                 # Hacer la llamada a la API
                 api_url = "http://127.0.0.1:8000/predict"
                 try:
-                    print(input_dict)
                     response = requests.post(api_url, json=input_dict)
                     response.raise_for_status()  # Esto lanzará una excepción para códigos de estado HTTP no exitosos
                     api_response = response.json()
-                    
-                    prediction = api_response['prediction']
-                    prediction_label = "Alta" if prediction > 0.5 else "Baja"
-                    importancia = api_response['importancia']
-                    contribucion = api_response['contribucion']
-                    
-                    # Crear gráfico de importancia
-                    importancia_df = pd.DataFrame(importancia)
-                    importancia_fig = px.bar(importancia_df, x='Característica', y='Importancia', title='Importancia de las Características')
-                    
-                    # Crear gráfico de contribución
-                    contribucion_df = pd.DataFrame(contribucion)
-                    contribucion_fig = px.pie(contribucion_df, values='Contribución', names='Característica', title='Contribución de las Características')
-                    
-                    return f"El nivel de satisfacción predicho es: {prediction_label}", importancia_fig, contribucion_fig
-                
-                except requests.RequestException as e:
+
+                    # Obtener el mensaje de la respuesta
+                    status_msg = api_response.get('msg', 'error')
+                    satisfaction_prediction = api_response.get('satisfaction_prediction', 'desconocido')
+
+
+                    # Establecer el label según el valor de 'msg'
+                    if status_msg == "ok":
+                        if satisfaction_prediction == "satisfecho":
+                            prediction_label = "El cliente estará satisfecho"
+                        elif satisfaction_prediction == "insatisfecho":
+                            prediction_label = "El cliente no estará satisfecho"
+                        else:
+                            prediction_label = "Predicción desconocida"
+
+                        return f"Predicción exitosa: {prediction_label}", {}, {}
+                    else:
+                        return "Error en la predicción: la API devolvió 'error'", {}, {}
+        
+                except requests.RequestException as e:  # Manejo de excepciones por problemas de conexión
                     return f"Error al conectar con la API: {str(e)}", {}, {}
-            
+
             return "", {}, {}
 
         @self.app.callback(
@@ -261,20 +263,20 @@ class AirlineApp:
                     dcc.Dropdown(id='input-gender', options=[{'label': i, 'value': i} for i in ['Male', 'Female']], value='Male'),
                     
                     html.Label("Tipo de Cliente", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Dropdown(id='input-customer-type', options=[{'label': i, 'value': i} for i in ['Loyal Customer', 'disloyal Customer']], value='Loyal Customer'),
+                    dcc.Dropdown(id='input-customer', options=[{'label': i, 'value': i} for i in ['Loyal Customer', 'disloyal Customer']], value='Loyal Customer'),
                     
                     html.Label("Tipo de Viaje", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Dropdown(id='input-type-of-travel', options=[{'label': i, 'value': i} for i in ['Personal Travel', 'Business travel']], value='Personal Travel'),
+                    dcc.Dropdown(id='input-type_travel', options=[{'label': i, 'value': i} for i in ['Personal Travel', 'Business travel']], value='Personal Travel'),
                     
                     html.Label("Clase", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Dropdown(id='input-class', options=[{'label': i, 'value': i} for i in ['Eco', 'Eco Plus', 'Business']], value='Eco'),
+                    dcc.Dropdown(id='input-class_flight', options=[{'label': i, 'value': i} for i in ['Eco', 'Eco Plus', 'Business']], value='Eco'),
                     
                     # Inputs numéricos
                     html.Label("Edad", style={"color": SECONDARY_COLOR_2}),
                     dcc.Input(id='input-age', type='number', value=30),
                     
                     html.Label("Distancia de Vuelo", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Input(id='input-flight-distance', type='number', value=1000),
+                    dcc.Input(id='input-distance', type='number', value=1000),
                     
                     # Sliders para servicios (escala 1-5)
                     html.Div([
@@ -288,18 +290,18 @@ class AirlineApp:
                                 value=3
                             )
                         ]) for service in [
-                            'Inflight wifi service', 'Departure/Arrival time convenient', 'Ease of Online booking',
-                            'Gate location', 'Food and drink', 'Online boarding', 'Seat comfort',
-                            'Inflight entertainment', 'On-board service', 'Leg room service',
-                            'Baggage handling', 'Checkin service', 'Inflight service', 'Cleanliness'
+                            'wifi', 'arrival_time', 'online_booking',
+                            'gate_location', 'food_drink', 'online_boarding', 'seat_confort',
+                            'entertainment', 'on_board', 'leg_room',
+                            'baggage_handling', 'checkin', 'inflight_serv', 'cleanliness'
                         ]
                     ]),
                     
                     html.Label("Retraso en la Salida (minutos)", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Input(id='input-departure-delay-in-minutes', type='number', value=0),
+                    dcc.Input(id='input-departure_delay', type='number', value=0),
                     
                     html.Label("Retraso en la Llegada (minutos)", style={"color": SECONDARY_COLOR_2}),
-                    dcc.Input(id='input-arrival-delay-in-minutes', type='number', value=0),
+                    dcc.Input(id='input-arrival_dealy', type='number', value=0),
                     
                    # html.Label("Grupo de Edad", style={"color": SECONDARY_COLOR_2}),
                     #dcc.Dropdown(id='input-age-group', options=[{'label': i, 'value': i} for i in ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']], value='25-34'),
