@@ -9,6 +9,7 @@ import sqlite3  # Import sqlite3 for database operations
 from datetime import datetime
 import sklearn
 import pickle
+import requests
 
 PRIMARY_COLOR = "#91C48A"
 SECONDARY_COLOR_1 = "#485751"
@@ -27,11 +28,6 @@ cols = ['Gender', 'Customer Type', 'Age', 'Type of Travel', 'Class',
         'Cleanliness', 'Departure Delay in Minutes', 'Arrival Delay in Minutes',
         'Age Group']
 
-def load_model():
-    with open('model_pipeline.pkl', 'rb') as file:
-        model = pickle.load(file)
-        return model
-
 
 df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
 
@@ -39,13 +35,10 @@ df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
 class AirlineApp:
     def __init__(self):
         self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME, "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"], suppress_callback_exceptions=True)
-        self.model = load_model()
         self.app.layout = self.create_layout()
         self.setup_callbacks()
         self.feedback_data = []
         self.init_db()  # Initialize the database
-        self.model = load_model()
-        print(type(self.model)) 
         
     def init_db(self):
         # Connect to the SQLite database
@@ -108,8 +101,8 @@ class AirlineApp:
             id='page-dropdown',
             options=[
                 {'label': 'Página Principal', 'value': 'main-page'},
-                {'label': 'Página 2', 'value': 'page-2'},
-                {'label': 'Página 3', 'value': 'page-3'}
+                {'label': 'Predicción', 'value': 'page-2'},
+                {'label': 'Data y Feedback', 'value': 'page-3'}
             ],
             value='main-page',
             clearable=False
@@ -138,8 +131,8 @@ class AirlineApp:
 
         @self.app.callback(
             [Output('output-prediccion', 'children'),
-            Output('importancia-grafico', 'figure'),
-            Output('contribucion-grafico', 'figure')],
+             Output('importancia-grafico', 'figure'),
+             Output('contribucion-grafico', 'figure')],
             [Input('submit-button', 'n_clicks')] +
             [Input(f'input-{col.lower().replace(" ", "-")}', 'value') for col in cols]
         )
@@ -148,43 +141,30 @@ class AirlineApp:
                 # Crear un diccionario con los valores de entrada
                 input_dict = dict(zip(cols, inputs))
                 
-                # Preprocesamiento de los datos de entrada
-                input_data = []
-                for col in cols:
-                    if col in ['Gender', 'Customer Type', 'Type of Travel', 'Class']:
-                        # Para variables categóricas, usar codificación one-hot
-                        categories = {
-                            'Gender': ['Male', 'Female'],
-                            'Customer Type': ['Loyal Customer', 'disloyal Customer'],
-                            'Type of Travel': ['Personal Travel', 'Business travel'],
-                            'Class': ['Eco', 'Eco Plus', 'Business']
-                        }
-                        input_data.extend([1 if input_dict[col] == cat else 0 for cat in categories[col]])
-                    elif col == 'Age Group':
-                        # Para 'Age Group', convertir a numérico
-                        age_groups = ['0-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+']
-                        input_data.extend([1 if input_dict[col] == group else 0 for group in age_groups])
-                    else:
-                        # Para variables numéricas, usar el valor directamente
-                        input_data.append(float(input_dict[col]))
-                print(input_data)
-                # Convertir a numpy array y hacer la predicción
-                input_array = np.array([input_data])
-                prediction = self.model.predict(input_array)[0]
-                prediction_label = "Alta" if prediction > 0.5 else "Baja"
+                # Hacer la llamada a la API
+                api_url = "http://127.0.0.1:8000/predict"
+                try:
+                    response = requests.post(api_url, json=input_dict)
+                    response.raise_for_status()  # Esto lanzará una excepción para códigos de estado HTTP no exitosos
+                    api_response = response.json()
+                    
+                    prediction = api_response['prediction']
+                    prediction_label = "Alta" if prediction > 0.5 else "Baja"
+                    importancia = api_response['importancia']
+                    contribucion = api_response['contribucion']
+                    
+                    # Crear gráfico de importancia
+                    importancia_df = pd.DataFrame(importancia)
+                    importancia_fig = px.bar(importancia_df, x='Característica', y='Importancia', title='Importancia de las Características')
+                    
+                    # Crear gráfico de contribución
+                    contribucion_df = pd.DataFrame(contribucion)
+                    contribucion_fig = px.pie(contribucion_df, values='Contribución', names='Característica', title='Contribución de las Características')
+                    
+                    return f"El nivel de satisfacción predicho es: {prediction_label}", importancia_fig, contribucion_fig
                 
-                # Calcular importancia y contribución de las características (ejemplo simplificado)
-                importancia = {'Característica': cols, 'Importancia': np.random.rand(len(cols))}
-                importancia['Importancia'] /= np.sum(importancia['Importancia'])  # Normalizar
-                importancia_df = pd.DataFrame(importancia)
-                importancia_fig = px.bar(importancia_df, x='Característica', y='Importancia', title='Importancia de las Características')
-                
-                contribucion = {'Característica': cols, 'Contribución': np.abs(np.random.randn(len(cols)))}
-                contribucion['Contribución'] /= np.sum(contribucion['Contribución'])  # Normalizar
-                contribucion_df = pd.DataFrame(contribucion)
-                contribucion_fig = px.pie(contribucion_df, values='Contribución', names='Característica', title='Contribución de las Características')
-                
-                return f"El nivel de satisfacción predicho es: {prediction_label}", importancia_fig, contribucion_fig
+                except requests.RequestException as e:
+                    return f"Error al conectar con la API: {str(e)}", {}, {}
             
             return "", {}, {}
 
