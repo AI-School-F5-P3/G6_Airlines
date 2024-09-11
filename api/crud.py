@@ -47,17 +47,17 @@ def post_data(db: Session, datax: model.FeatureSchema):
 	df['Age Group'] = df['Age Group'].astype('category')
 	
 	try:
-		prediction = pipeline.predict(df)
-		data_db = datax.model_dump()
-		data_db['prediction'] = int(prediction[0])
-		new_data = model.Data(**data_db)
-		db.add(new_data)
-		db.commit()
-		return 1
+			prediction = pipeline.predict(df)
+			data_db = datax.model_dump()
+			data_db['prediction'] = int(prediction[0])
+			new_data = model.Data(**data_db)
+			db.add(new_data)
+			db.commit()
+			return 1
 	except SQLAlchemyError:
-		db.rollback()
+			db.rollback()
 	except Exception:
-		db.rollback()
+			db.rollback()
 	return 0
 	
 def get_all_data(db: Session):

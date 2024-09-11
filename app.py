@@ -33,12 +33,20 @@ df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
 
 class AirlineApp:
     def __init__(self):
-        self.app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME, "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"], suppress_callback_exceptions=True)
+        self.app = dash.Dash(
+            __name__,
+            external_stylesheets=[
+                dbc.themes.BOOTSTRAP,
+                dbc.icons.FONT_AWESOME,
+                "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"
+            ],
+            suppress_callback_exceptions=True
+        )
         self.app.layout = self.create_layout()
         self.setup_callbacks()
         self.feedback_data = []
         self.init_db()  # Initialize the database
-        
+
     def init_db(self):
         # Connect to the SQLite database
         self.conn = sqlite3.connect('feedback.db')
@@ -139,7 +147,7 @@ class AirlineApp:
             if n_clicks > 0:
                 # Crear un diccionario con los valores de entrada
                 input_dict = dict(zip(cols, inputs))
-                
+
                 # Hacer la llamada a la API
                 api_url = "http://127.0.0.1:8000/predict"
                 try:
@@ -148,8 +156,7 @@ class AirlineApp:
                     api_response = response.json()
 
                     # Obtener el mensaje de la respuesta
-                    status_msg = api_response.get('msg', 'error')
-                    satisfaction_prediction = api_response.get('satisfaction_prediction', 'desconocido')
+                    status_msg = api_response.get('msg')
 
 
                     # Establecer el label según el valor de 'msg'
@@ -375,6 +382,7 @@ class AirlineApp:
 
     def run(self):
         self.app.run_server(debug=True)
+
 
 if __name__ == '__main__':
     app_instance = AirlineApp()
