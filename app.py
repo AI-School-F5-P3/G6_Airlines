@@ -384,7 +384,6 @@ class AirlineApp:
     def run(self):
         self.app.run_server(debug=True)
 
-
 if __name__ == '__main__':
     app_instance = AirlineApp()
-    app_instance.run()
+    app_instance.app.run_server(debug=True, host='0.0.0.0')
