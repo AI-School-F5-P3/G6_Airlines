@@ -55,7 +55,7 @@ def post_data(db: Session, datax: model.FeatureSchema):
 		db.commit()
 		return {"pred": data_db['prediction']}
 	except SQLAlchemyError:
-			db.rollback()
+		db.rollback()
 	except Exception:
 		db.rollback()
 	return None

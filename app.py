@@ -153,17 +153,18 @@ class AirlineApp:
                 try:
                     response = requests.post(api_url, json=input_dict)
                     response.raise_for_status()  # Esto lanzará una excepción para códigos de estado HTTP no exitosos
-                    api_response = response.json()
+                    data = response.json()
 
                     # Obtener el mensaje de la respuesta
-                    status_msg = api_response.get('msg')
+                    status_msg = data.get('msg')
+                    satisfaction_prediction = data.get("prediction")
 
 
                     # Establecer el label según el valor de 'msg'
                     if status_msg == "ok":
-                        if satisfaction_prediction == "satisfecho":
+                        if satisfaction_prediction == 1:
                             prediction_label = "El cliente estará satisfecho"
-                        elif satisfaction_prediction == "insatisfecho":
+                        elif satisfaction_prediction == 0:
                             prediction_label = "El cliente no estará satisfecho"
                         else:
                             prediction_label = "Predicción desconocida"
