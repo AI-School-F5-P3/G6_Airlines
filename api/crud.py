@@ -53,12 +53,12 @@ def post_data(db: Session, datax: model.FeatureSchema):
 		new_data = model.Data(**data_db)
 		db.add(new_data)
 		db.commit()
-		return 1
+		return {"pred": data_db['prediction']}
 	except SQLAlchemyError:
 		db.rollback()
 	except Exception:
 		db.rollback()
-	return 0
+	return None
 	
 def get_all_data(db: Session):
 	pass

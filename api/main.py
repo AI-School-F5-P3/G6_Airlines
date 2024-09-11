@@ -21,6 +21,6 @@ def predict(data: model.FeatureSchema, db: Session = Depends(get_db)):
     result = crud.post_data(db, data)
     if result:
         # Suponiendo que 'result' contiene una predicción de si el cliente estará satisfecho
-        return {"msg": "ok", "data": data}
+        return {"msg": "ok", "data": data, "prediction": result['pred']}
     else:
         return {"msg": "error"}
