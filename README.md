@@ -1,4 +1,4 @@
-# G6 AIRLINE
+# G6 AIRLINE ![G6Airline Logo](C:\Users\Administrator\Desktop\F5Proyectos\G6_Airlines\assets\G6airline)
 G6Airline, un sistema innovador que utiliza técnicas
 de aprendizaje supervisado para predecir la satisfacción del cliente. El proyecto se basa en un modelo de aprendizaje
 automático que analiza datos relevantes y genera predicciones precisas sobre la experiencia del cliente.
@@ -37,7 +37,8 @@ Asegúrate de tener instalado Python en tu sistema. Este proyecto fue desarrolla
 
 1. Clona este repositorio:
    ```
-  git@github.com:AI-School-F5-P3/G6_Airlines.git
+  git clone https://github.com/tu-usuario/G6Airline.git
+cd G6Airline
    ```
 
 2. Instala las dependencias necesarias:
