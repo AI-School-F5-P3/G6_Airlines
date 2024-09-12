@@ -2,18 +2,22 @@ version: '3.8'
 
 services:
   dash-app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile.dash
     ports:
       - "8050:8050"
     volumes:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
+    depends_on:
+      - fastapi
 
   fastapi:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile.fastapi
     ports:
       - "8000:8000"
     depends_on:
