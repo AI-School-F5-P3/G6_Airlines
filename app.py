@@ -10,6 +10,7 @@ from datetime import datetime
 import sklearn
 import pickle
 import requests
+from flask import Flask, send_from_directory
 
 PRIMARY_COLOR = "#91C48A"
 SECONDARY_COLOR_1 = "#485751"
@@ -30,6 +31,8 @@ cols = ['gender', 'customer', 'age', 'type_travel', 'class_flight',
 
 df = pd.read_csv('Data/airline_passenger_satisfaction.csv')
 
+server = Flask(__name__)
+app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.FONT_AWESOME, "https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap"], suppress_callback_exceptions=True)
 
 class AirlineApp:
     def __init__(self):
@@ -42,10 +45,27 @@ class AirlineApp:
             ],
             suppress_callback_exceptions=True
         )
+        self.app = app
         self.app.layout = self.create_layout()
         self.setup_callbacks()
+        self.setup_game_router()
         self.feedback_data = []
         self.init_db()  # Initialize the database
+
+    def setup_game_router(self):
+        @server.route('/game/<path:path>')
+        def serve_game(path):
+            return send_from_directory('game', path)
+        
+    def game_page_content(self):
+        return html.Div([
+            html.H1("Flappy Bird de G6 Airline", style={"color": PRIMARY_COLOR}),
+            html.Iframe(
+                src="/game/fly.html",
+                style={"width": "640px", "height": "400px", "border": "none"},
+                id="game-iframe"
+            )
+        ])
 
     def init_db(self):
         # Connect to the SQLite database
@@ -109,7 +129,8 @@ class AirlineApp:
             options=[
                 {'label': 'Página Principal', 'value': 'main-page'},
                 {'label': 'Predicción', 'value': 'page-2'},
-                {'label': 'Data y Feedback', 'value': 'page-3'}
+                {'label': 'Data y Feedback', 'value': 'page-3'},
+                {'label': 'Flappy Bird', 'value': 'game-page'}
             ],
             value='main-page',
             clearable=False
@@ -135,7 +156,9 @@ class AirlineApp:
                 return self.page_2_content()
             elif selected_page == 'page-3':
                 return self.page_3_content()
-
+            elif selected_page == 'game-page':
+                return self.game_page_content()
+    
         @self.app.callback(
             [Output('output-prediccion', 'children'),
              Output('importancia-grafico', 'figure'),
@@ -387,4 +410,4 @@ class AirlineApp:
 
 if __name__ == '__main__':
     app_instance = AirlineApp()
-    app_instance.run()
+    app.run_server(debug=True)
