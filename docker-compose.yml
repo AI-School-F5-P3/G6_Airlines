@@ -11,7 +11,9 @@ services:
       - PYTHONUNBUFFERED=1
 
   fastapi:
-    build: ./fastapi
+    build:
+      context: ./api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:

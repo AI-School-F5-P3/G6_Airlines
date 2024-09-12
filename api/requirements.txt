@@ -1,0 +1,5 @@
+fastapi==0.114.1
+uvicorn==0.30.6
+sqlalchemy==2.0.34
+mysqlclient==2.2.4
+python-dotenv==1.0.1

@@ -114,3 +114,8 @@ numpy
 pandas
 scikit-learn
 requests
+fastapi
+uvicorn
+sqlalchemy
+mysqlclient
+python-dotenv
