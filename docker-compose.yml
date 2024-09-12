@@ -17,21 +17,23 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DEV_USER=${DEV_USER}
-      - DEV_PASSWORD=${DEV_PASSWORD}
-      - DEV_HOST=db
-      - DEV_PORT=3306
-      - DEV_DATABASE=${DEV_DATABASE}
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@db/${MYSQL_DATABASE}
 
   db:
     image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=${DEV_PASSWORD}
-      - MYSQL_DATABASE=${DEV_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 20s
+      retries: 10
 
 volumes:
   mysql_data:
