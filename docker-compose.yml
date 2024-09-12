@@ -33,13 +33,14 @@ services:
   db:
     image: mysql:8.0
     environment:
-     USER = os.getenv('DEV_USER')
-     PASS = os.getenv('DEV_PASSWORD')
-     HOST = os.getenv('DEV_HOST')
-     PORT = os.getenv('DEV_PORT')
-DB = os.getenv('DEV_DATABASE')
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
     ports:
-      - "3307:3306"  # Changed external port to 3307
+      - "${MYSQL_PORT}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
