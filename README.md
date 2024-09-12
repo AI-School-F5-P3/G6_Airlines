@@ -1,4 +1,4 @@
-# G6 AIRLINE ![main-logo-transparent](https://github.com/user-attachments/assets/428962ec-5dc6-46df-8622-b3901b7cdffb)
+# ![main-logo-transparent](https://github.com/user-attachments/assets/428962ec-5dc6-46df-8622-b3901b7cdffb)  G6 AIRLINE
 
 G6Airline, un sistema innovador que utiliza técnicas
 
