@@ -54,15 +54,3 @@ urllib3==2.2.2
 werkzeug==3.0.4
 xgboost==2.1.1
 zipp==3.20.1
-dash
-dash-bootstrap-components
-plotly
-numpy
-pandas
-scikit-learn
-requests
-fastapi
-uvicorn
-sqlalchemy
-mysqlclient
-python-dotenv
