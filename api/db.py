@@ -12,10 +12,10 @@ USER = os.getenv('MYSQL_USER')
 PASS = os.getenv('MYSQL_PASSWORD')
 HOST = os.getenv('MYSQL_HOST')
 PORT = os.getenv('MYSQL_PORT')
-DB = os.getenv('MYSQL_DATABASE')
+DB = os.getenv('MYSQL_DB')
 
 # Correct the f-string to use the right variable names
-DATABASE_URL = f"mysql://{USER}:{PASS}@{HOST}:{PORT}/{DB}"
+DATABASE_URL = f"mysql+mysqlconnector://{USER}:{PASS}@{HOST}:{PORT}/{DB}"
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
