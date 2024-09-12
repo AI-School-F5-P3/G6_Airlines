@@ -13,8 +13,7 @@ HOST = os.getenv('DEV_HOST')
 PORT = os.getenv('DEV_PORT')
 DB = os.getenv('DEV_DATABASE')
 
-database_url = f"mysql+mysqlconnector://root:{os.getenv('MYSQL_ROOT_PASSWORD')}@db:3306/{os.getenv('MYSQL_DATABASE')}"
-engine = create_engine(database_url)
+DATABASE_URL = f"mysql://{MYSQL_USER}:{MYSQL_PASSWORD}@db:3306/{MYSQL_DB}"engine = create_engine(database_url)
 SessionLocal = sessionmaker(bind=engine)
 
 Base = declarative_base()
