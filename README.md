@@ -1,4 +1,4 @@
-# ![main-logo-transparent](https://github.com/user-attachments/assets/428962ec-5dc6-46df-8622-b3901b7cdffb)  G6 AIRLINE
+# G6 AIRLINE
 
 G6Airline, un sistema innovador que utiliza técnicas
 
@@ -39,14 +39,12 @@ Asegúrate de tener instalado Python en tu sistema. Este proyecto fue desarrolla
 
 1. Clona este repositorio:
    ```
-  git clone https://github.com/tu-usuario/G6Airline.git
-cd G6Airline
-   ```
+   git clone https://github.com/tu-usuario/G6Airline.git
+   cd G6Airline
 
 2. Instala las dependencias necesarias:
    ```
    pip install -r requirements.txt
-   ```
 
 ## Uso
 
@@ -57,14 +55,14 @@ Para ejecutar G6Airline, necesitas iniciar tanto la API como la aplicación prin
 1. Navega al directorio de la API (si es necesario):
    ```
    cd path/to/api
-   ```
+   
 
 2. Inicia el servidor de la API con Uvicorn:
    ```
    uvicorn main:app --reload
-   ```
+   
 
-   La API ahora debería estar ejecutándose en `http://localhost:8000`.
+La API ahora debería estar ejecutándose en `http://localhost:8000`.
 
 ### Iniciar la Aplicación Principal
 
@@ -83,8 +81,9 @@ Para ejecutar G6Airline, necesitas iniciar tanto la API como la aplicación prin
 - API RESTful para realizar predicciones.
 - Interfaz de usuario para interactuar con el modelo de predicción.
 
+
 ## Contribuir
 
 Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cambios mayores antes de hacer un pull request.
 
-
+ ![main-logo-transparent](https://github.com/user-attachments/assets/428962ec-5dc6-46df-8622-b3901b7cdffb) 
