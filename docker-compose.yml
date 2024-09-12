@@ -1,4 +1,5 @@
-version: '3'
+version: '3.8'
+
 services:
   dash-app:
     build: .
@@ -8,3 +9,27 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
+
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEV_USER=${DEV_USER}
+      - DEV_PASSWORD=${DEV_PASSWORD}
+      - DEV_HOST=db
+      - DEV_PORT=3306
+      - DEV_DATABASE=${DEV_DATABASE}
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DEV_PASSWORD}
+      - MYSQL_DATABASE=${DEV_DATABASE}
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
