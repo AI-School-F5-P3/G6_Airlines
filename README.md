@@ -1,5 +1,7 @@
-# G6 AIRLINE ![G6Airline Logo](g6airline_logo.png)
+# G6 AIRLINE ![main-logo-transparent](https://github.com/user-attachments/assets/428962ec-5dc6-46df-8622-b3901b7cdffb)
+
 G6Airline, un sistema innovador que utiliza técnicas
+
 de aprendizaje supervisado para predecir la satisfacción del cliente. El proyecto se basa en un modelo de aprendizaje
 automático que analiza datos relevantes y genera predicciones precisas sobre la experiencia del cliente.
 
