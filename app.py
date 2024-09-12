@@ -149,7 +149,7 @@ class AirlineApp:
                 input_dict = dict(zip(cols, inputs))
 
                 # Hacer la llamada a la API
-                api_url = "http://127.0.0.1:8000/predict"
+                api_url = "http://fastapi:8000/predict"
                 try:
                     response = requests.post(api_url, json=input_dict)
                     response.raise_for_status()  # Esto lanzará una excepción para códigos de estado HTTP no exitosos
@@ -386,4 +386,4 @@ class AirlineApp:
 
 if __name__ == '__main__':
     app_instance = AirlineApp()
-    app_instance.app.run_server(debug=True, host='0.0.0.0')
+    app_instance.app.run()
