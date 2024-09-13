@@ -4,7 +4,7 @@ services:
   dash-app:
     build:
       context: .
-      dockerfile: Dockerfile.dash
+      dockerfile: Dockerfile
     ports:
       - "8050:8050"
     volumes:
@@ -18,15 +18,15 @@ services:
 
   fastapi:
     build:
-      context: .
-      dockerfile: Dockerfile.fastapi
+      context: ./api
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3307/${MYSQL_DB}
+      - DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DB}
     networks:
       - app-network
 
@@ -37,7 +37,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB}
     ports:
-       - "3307:3306"
+       - "3306"
 
     volumes:
       - mysql_data:/var/lib/mysql

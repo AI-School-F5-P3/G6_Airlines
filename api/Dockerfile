@@ -9,7 +9,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r ../requirements.txt
+COPY .env /app/.env
+COPY ../model_pipeline.pkl /app/
+
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install mysql-connector-python
 
 COPY . .

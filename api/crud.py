@@ -5,8 +5,8 @@ import pandas as pd
 
 import model
 
-with open('../model_pipeline.pkl', 'rb') as f:
-    pipeline = joblib.load('../model_pipeline.pkl')
+with open('./model_pipeline.pkl', 'rb') as f:
+    pipeline = joblib.load('./model_pipeline.pkl')
 
 def ages():
 	r_age = range(5, 101)[::5]
