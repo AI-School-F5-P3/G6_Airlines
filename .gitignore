@@ -1,9 +1,11 @@
 # Entorno virtual
 env/
 myenv/
+.venv/
 
 # Archivos de configuración del entorno
 *.env
+*.venv
 
 # Archivos compilados de Python
 *.pyc
